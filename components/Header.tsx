@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import type { User } from '../types';
+import { MenuIcon } from './icons/MenuIcon';
+import { XIcon } from './icons/XIcon';
+
+interface HeaderProps {
+  user: User;
+  onLogout: () => void;
+  activeView: 'table' | 'calculator' | 'users';
+  onViewChange: (view: 'table' | 'calculator' | 'users') => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ user, onLogout, activeView, onViewChange }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const activeTabClass = "bg-yellow-400 text-gray-900 shadow-sm";
+  const inactiveTabClass = "text-gray-600 hover:bg-yellow-200 hover:text-gray-800";
+  const mobileLinkClass = "block px-3 py-2 rounded-md text-base font-medium";
+
+  const isAdmin = user.role === 'admin';
+
+  const handleViewChange = (view: 'table' | 'calculator' | 'users') => {
+    onViewChange(view);
+    setIsMenuOpen(false);
+  }
+
+  return (
+    <header className="bg-white shadow-md sticky top-0 z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L9 5.414V17a1 1 0 102 0V5.414l5.293 5.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+            <h1 className="text-2xl font-bold text-gray-800 ml-3">TABELA TÁXI</h1>
+          </div>
+          
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="bg-gray-200 p-1 rounded-full flex items-center">
+              <button 
+                onClick={() => handleViewChange('table')}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeView === 'table' ? activeTabClass : inactiveTabClass}`}>
+                Tabela de Preços
+              </button>
+              <button 
+                onClick={() => handleViewChange('calculator')}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeView === 'calculator' ? activeTabClass : inactiveTabClass}`}>
+                Viagens Longas
+              </button>
+              {isAdmin && (
+                <button 
+                  onClick={() => handleViewChange('users')}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeView === 'users' ? activeTabClass : inactiveTabClass}`}>
+                  Usuários
+                </button>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.email}</span>
+              <button
+                onClick={onLogout}
+                className="px-3 py-2 bg-red-500 text-white text-sm font-semibold rounded-full hover:bg-red-600 transition-colors"
+                title="Sair"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+          
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Abrir menu principal</span>
+              {isMenuOpen ? <XIcon className="block h-6 w-6" /> : <MenuIcon className="block h-6 w-6" />}
+            </button>
+          </div>
+
+        </div>
+      </div>
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-200">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <button onClick={() => handleViewChange('table')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'table' ? activeTabClass : inactiveTabClass}`}>Tabela de Preços</button>
+            <button onClick={() => handleViewChange('calculator')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'calculator' ? activeTabClass : inactiveTabClass}`}>Viagens Longas</button>
+            {isAdmin && <button onClick={() => handleViewChange('users')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'users' ? activeTabClass : inactiveTabClass}`}>Usuários</button>}
+          </div>
+          <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="flex items-center justify-between px-4">
+                <div>
+                    <div className="text-base font-medium text-gray-800">{user.email}</div>
+                    <div className="text-sm font-medium text-gray-500">{user.role}</div>
+                </div>
+                <button
+                    onClick={onLogout}
+                    className="ml-auto flex-shrink-0 bg-red-500 p-2 text-white rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+                    title="Sair"
+                >
+                    Sair
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default Header;
