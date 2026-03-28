@@ -46,62 +46,68 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Bem-vindo ao TABELA TÁXI</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            {isLoginView ? 'Faça login para continuar' : 'Crie sua conta'}
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-6">
+      <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-10 sm:p-14">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-gray-800 dark:text-white">TABELA TÁXI</h1>
+          <p className="text-2xl text-gray-600 dark:text-gray-300 mt-4">
+            {isLoginView ? 'Bem-vindo de volta' : 'Crie sua conta'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input
-            type="text"
-            placeholder="E-mail ou 'Admin'"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            required
-          />
-          {!isLoginView && (
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div>
             <input
-              type="password"
-              placeholder="Confirmar Senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              required
+                type="text"
+                placeholder="E-mail ou 'Admin'"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-6 py-5 text-2xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-4 focus:ring-yellow-500/50"
+                required
             />
+          </div>
+          <div>
+            <input
+                type="password"
+                placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-6 py-5 text-2xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-4 focus:ring-yellow-500/50"
+                required
+            />
+          </div>
+          {!isLoginView && (
+            <div>
+                <input
+                type="password"
+                placeholder="Confirmar Senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-6 py-5 text-2xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-4 focus:ring-yellow-500/50"
+                required
+                />
+            </div>
           )}
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          {success && <p className="text-green-500 text-sm text-center">{success}</p>}
+          {error && <p className="text-red-500 text-xl text-center font-bold bg-red-100 p-3 rounded">{error}</p>}
+          {success && <p className="text-green-500 text-xl text-center font-bold bg-green-100 p-3 rounded">{success}</p>}
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors duration-300 shadow-md"
+            className="w-full bg-yellow-500 text-gray-900 font-extrabold py-5 px-8 rounded-xl hover:bg-yellow-600 transition-colors duration-300 shadow-lg text-2xl uppercase tracking-wide"
           >
             {isLoginView ? 'Entrar' : 'Cadastrar'}
           </button>
         </form>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-10">
           <button
             onClick={() => {
                 setIsLoginView(!isLoginView);
                 setError(null);
                 setSuccess(null);
             }}
-            className="text-sm text-yellow-600 hover:underline"
+            className="text-xl text-yellow-600 hover:text-yellow-700 hover:underline font-semibold"
           >
             {isLoginView ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
           </button>

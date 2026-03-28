@@ -12,3 +12,9 @@ export interface User {
   role: 'user' | 'admin';
   createdAt: string;
 }
+
+export interface LongTrip {
+  id: string;
+  city: string;
+  kilometers: number;
+}

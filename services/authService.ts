@@ -1,3 +1,4 @@
+
 import type { User } from '../types';
 
 // NOTE: This is a simulation. In a real app, never store passwords in plain text or handle auth client-side.
@@ -93,4 +94,14 @@ export const getAllUsers = (): User[] => {
         role: u.role,
         createdAt: u.createdAt,
     }));
+};
+
+export const deleteUser = (email: string): boolean => {
+    const users = getStoredUsers();
+    if (users[email]) {
+        delete users[email];
+        storeUsers(users);
+        return true;
+    }
+    return false;
 };

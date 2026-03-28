@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import type { Fare, User } from './types';
+import type { Fare, User, LongTrip } from './types';
 import Header from './components/Header';
 import FareTable from './components/FareTable';
 import LongTripCalculator from './components/LongTripCalculator';
@@ -13,12 +13,39 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getCurrentUser());
   const [activeView, setActiveView] = useState<'table' | 'calculator' | 'users'>('table');
   const [fares, setFares] = useState<Fare[]>(fareService.getFares());
+  const [longTrips, setLongTrips] = useState<LongTrip[]>(fareService.getLongTrips());
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [pricePerKm, setPricePerKm] = useState<number>(3.50);
+  const [longTripSearchTerm, setLongTripSearchTerm] = useState<string>('');
+  
+  // Lazy initialization ensures we read from localStorage correctly on mount
+  const [pricePerKm, setPricePerKm] = useState<number>(() => fareService.getPricePerKm());
+
+  // Sync data across tabs/windows to ensure users receive updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setFares(fareService.getFares());
+      setLongTrips(fareService.getLongTrips());
+      setPricePerKm(fareService.getPricePerKm());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     fareService.storeFares(fares);
   }, [fares]);
+
+  useEffect(() => {
+    fareService.storeLongTrips(longTrips);
+  }, [longTrips]);
+
+  useEffect(() => {
+    // Only store if it's a valid number to prevent overwriting with bad data
+    if (!isNaN(pricePerKm)) {
+        fareService.storePricePerKm(pricePerKm);
+    }
+  }, [pricePerKm]);
 
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
@@ -36,6 +63,12 @@ const App: React.FC = () => {
     );
   }, [fares, searchTerm]);
 
+  const filteredLongTrips = React.useMemo(() => {
+    return longTrips.filter(trip =>
+        trip.city.toLowerCase().includes(longTripSearchTerm.toLowerCase())
+    );
+  }, [longTrips, longTripSearchTerm]);
+
   const handleAddFare = (newFare: Fare) => {
     setFares(prevFares => [newFare, ...prevFares]);
   };
@@ -50,6 +83,18 @@ const App: React.FC = () => {
   
   const handleImportFares = (newFares: Fare[]) => {
     setFares(prevFares => [...prevFares, ...newFares]);
+  };
+
+  const handleAddLongTrip = (newTrip: LongTrip) => {
+    setLongTrips(prev => [newTrip, ...prev]);
+  };
+
+  const handleUpdateLongTrip = (updatedTrip: LongTrip) => {
+    setLongTrips(prev => prev.map(t => (t.id === updatedTrip.id ? updatedTrip : t)));
+  };
+
+  const handleDeleteLongTrip = (tripId: string) => {
+    setLongTrips(prev => prev.filter(t => t.id !== tripId));
   };
 
   if (!currentUser) {
@@ -79,10 +124,16 @@ const App: React.FC = () => {
             isAdmin={isAdmin}
             pricePerKm={pricePerKm}
             setPricePerKm={setPricePerKm}
+            longTrips={filteredLongTrips}
+            searchTerm={longTripSearchTerm}
+            setSearchTerm={setLongTripSearchTerm}
+            onAddLongTrip={handleAddLongTrip}
+            onUpdateLongTrip={handleUpdateLongTrip}
+            onDeleteLongTrip={handleDeleteLongTrip}
           />
         );
       case 'users':
-        return isAdmin ? <UserManagement /> : <p>Acesso negado.</p>;
+        return isAdmin ? <UserManagement /> : <p className="text-xl">Acesso negado.</p>;
       default:
         return null;
     }
@@ -99,7 +150,7 @@ const App: React.FC = () => {
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         {renderActiveView()}
       </main>
-      <footer className="text-center p-4 text-gray-500 text-sm">
+      <footer className="text-center p-6 text-gray-500 text-base">
         <p>&copy; {new Date().getFullYear()} TABELA TÁXI. Todos os direitos reservados.</p>
       </footer>
     </div>

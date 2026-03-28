@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.API_KEY;
@@ -10,44 +11,52 @@ const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const getDistance = async (origin: string, destination: string): Promise<number | null> => {
   const model = 'gemini-2.5-flash';
-  // Updated prompt to request just the number, making the response easier to parse.
-  const prompt = `Qual a distância de carro em quilômetros entre "${origin}" e "${destination}"? Responda apenas com o número.`;
+  
+  // Prompt otimizado para usar Search e Maps, garantindo maior taxa de sucesso na localização
+  const prompt = `Tarefa: Calcular a distância de carro (em km) entre "${origin}" e "${destination}".
+  Contexto: Minas Gerais, Brasil.
+  
+  Instruções Críticas:
+  1. O objetivo é obter um valor numérico para cálculo de frete.
+  2. Use o 'googleSearch' para encontrar a distância rodoviária se o 'googleMaps' falhar ou for ambíguo. (Pesquise termos como "distância de carro entre ${origin} e ${destination}").
+  3. Se houver ambiguidade no nome da cidade (ex: "Palma"), assuma SEMPRE que é o município dentro de Minas Gerais (Palma, MG).
+  4. Se não encontrar um endereço exato (rua/número), use o centro da cidade ou bairro.
+  5. PRIORIDADE: Você DEVE retornar um número. Se não conseguir a precisão exata, retorne a melhor estimativa baseada em dados de busca. NÃO retorne mensagens de erro ou explicações de que não conseguiu calcular.
+  6. Formato: Responda APENAS com o número (exemplo: 150.5).`;
 
   try {
     const response = await ai.models.generateContent({
       model: model,
       contents: prompt,
       config: {
-        tools: [{googleMaps: {}}],
+        // Habilita tanto Maps quanto Search para robustez na localização de pontos de interesse
+        tools: [{ googleMaps: {}, googleSearch: {} }],
         temperature: 0.1,
       },
     });
     
-    const text = response.text.trim();
+    const text = response.text?.trim();
 
-    // Standardize decimal separators for robust parsing.
+    if (!text) {
+        console.error("Empty response from Gemini");
+        return null;
+    }
+
+    // Normaliza separadores decimais (vírgula para ponto) para parsing correto
     const sanitizedText = text.replace(',', '.');
 
-    // More robust parsing logic:
-    // 1. Try to parse the whole string as a number.
-    let distance = parseFloat(sanitizedText);
-
-    // 2. If it fails (e.g., "Approx. 450.5 km"), use a regex to find the first number.
-    if (isNaN(distance)) {
-        const distanceMatch = sanitizedText.match(/(\d+(?:\.\d+)?)/);
-        if (distanceMatch) {
-            distance = parseFloat(distanceMatch[1]);
+    // Tenta extrair o primeiro número válido encontrado na string (inteiro ou float)
+    // Isso previne erros caso o modelo responda algo como "A distância é 45.5 km"
+    const distanceMatch = sanitizedText.match(/(\d+(\.\d+)?)/);
+    
+    if (distanceMatch) {
+        const distance = parseFloat(distanceMatch[0]);
+        if (!isNaN(distance) && distance > 0) {
+            return distance;
         }
     }
 
-    if (!isNaN(distance) && distance > 0) {
-      return distance;
-    }
-
     console.error("Could not parse a valid distance from Gemini response:", text);
-    if (response.candidates?.[0]?.groundingMetadata) {
-        console.error("Grounding Metadata:", JSON.stringify(response.candidates[0].groundingMetadata));
-    }
     return null;
 
   } catch (error) {
