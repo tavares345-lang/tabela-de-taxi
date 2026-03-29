@@ -7,8 +7,8 @@ import { XIcon } from './icons/XIcon';
 interface HeaderProps {
   user: User;
   onLogout: () => void;
-  activeView: 'table' | 'calculator' | 'users';
-  onViewChange: (view: 'table' | 'calculator' | 'users') => void;
+  activeView: 'table' | 'users';
+  onViewChange: (view: 'table' | 'users') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ user, onLogout, activeView, onViewChange }) => {
@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, activeView, onViewChang
 
   const isAdmin = user.role === 'admin';
 
-  const handleViewChange = (view: 'table' | 'calculator' | 'users') => {
+  const handleViewChange = (view: 'table' | 'users') => {
     onViewChange(view);
     setIsMenuOpen(false);
   }
@@ -43,11 +43,6 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, activeView, onViewChang
                 onClick={() => handleViewChange('table')}
                 className={`px-6 py-3 rounded-full text-lg font-bold transition-all duration-300 ${activeView === 'table' ? activeTabClass : inactiveTabClass}`}>
                 Bairro/Hotel
-              </button>
-              <button 
-                onClick={() => handleViewChange('calculator')}
-                className={`px-6 py-3 rounded-full text-lg font-bold transition-all duration-300 ${activeView === 'calculator' ? activeTabClass : inactiveTabClass}`}>
-                Viagens Longas
               </button>
               {isAdmin && (
                 <button 
@@ -90,7 +85,6 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, activeView, onViewChang
         <div className="md:hidden border-t border-gray-200">
           <div className="px-2 pt-4 pb-4 space-y-2 sm:px-3">
             <button onClick={() => handleViewChange('table')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'table' ? activeTabClass : inactiveTabClass}`}>Bairro/Hotel</button>
-            <button onClick={() => handleViewChange('calculator')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'calculator' ? activeTabClass : inactiveTabClass}`}>Viagens Longas</button>
             {isAdmin && <button onClick={() => handleViewChange('users')} className={`w-full text-left ${mobileLinkClass} ${activeView === 'users' ? activeTabClass : inactiveTabClass}`}>Usuários</button>}
           </div>
           <div className="pt-5 pb-5 border-t border-gray-200">
